@@ -1,5 +1,30 @@
 document.addEventListener("DOMContentLoaded", function() {
 
+    // --- GSAP Animations ---
+    gsap.registerPlugin(ScrollTrigger);
+
+    // Header animation
+    gsap.from('h1', {
+        duration: 1.5,
+        y: -50,
+        opacity: 0,
+        ease: 'power3.out'
+    });
+
+    // Gallery animation
+    gsap.from('#gallery img', {
+        duration: 1,
+        opacity: 0,
+        scale: 0.8,
+        stagger: 0.2,
+        scrollTrigger: {
+            trigger: '#gallery',
+            start: 'top 80%',
+            end: 'bottom top',
+            toggleActions: 'play none none reverse'
+        }
+    });
+
     // --- Lightbox Functionality ---
     const gallery = document.getElementById('gallery');
     if (gallery) {
@@ -10,12 +35,23 @@ document.addEventListener("DOMContentLoaded", function() {
                 document.body.appendChild(lightbox);
 
                 const lightboxImage = document.createElement('img');
-                lightboxImage.src = e.target.src;
+                const highResSrc = e.target.getAttribute('data-src') || e.target.src;
+                lightboxImage.src = highResSrc;
                 lightbox.appendChild(lightboxImage);
 
-                lightbox.addEventListener('click', function() {
+                const closeLightbox = () => {
                     document.body.removeChild(lightbox);
-                });
+                    document.removeEventListener('keydown', handleKeyDown);
+                };
+
+                const handleKeyDown = (e) => {
+                    if (e.key === 'Escape') {
+                        closeLightbox();
+                    }
+                };
+
+                lightbox.addEventListener('click', closeLightbox);
+                document.addEventListener('keydown', handleKeyDown);
             }
         });
     }
@@ -38,16 +74,5 @@ document.addEventListener("DOMContentLoaded", function() {
         lazyImageObserver.observe(lazyImage);
     });
 
-
-    // --- Smooth Scrolling ---
-    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-        anchor.addEventListener('click', function (e) {
-            e.preventDefault();
-
-            document.querySelector(this.getAttribute('href')).scrollIntoView({
-                behavior: 'smooth'
-            });
-        });
-    });
 
 });
